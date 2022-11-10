@@ -5,12 +5,21 @@
  * board fills (tie)
  */
 
+class Player {
+  constructor(color) {
+    this.color = color;
+  }
+}
+
+
 class Game {
-  constructor(width, height) {
+  constructor(width, height, players) {
     this.width = width;
     this.height = height;
-    this.currPlayer = 1; // active player: 1 or 2
+    this.currPlayer = 1; // active player index
     this.board = []; // array of rows, each row is array of cells  (board[y][x])
+    this.gameOver = false;
+    this.players = players;
 
     this.makeBoard();
     this.makeHtmlBoard();
@@ -70,8 +79,9 @@ class Game {
   placeInTable(y, x) {
     const piece = document.createElement('div');
     piece.classList.add('piece');
-    piece.classList.add(`p${this.currPlayer}`);
-    piece.style.top = -50 * (y + 2);
+    // piece.classList.add(`p${this.currPlayer}`);
+    piece.style.backgroundColor = this.players[this.currPlayer - 1];
+    // piece.style.top = -50 * (y + 2);
 
     const spot = document.getElementById(`${y}-${x}`);
     spot.append(piece);
@@ -79,11 +89,16 @@ class Game {
 
   /** endGame: announce game end */
   endGame(msg) {
+    this.gameOver = true;
     alert(msg);
   }
 
   /** handleClick: handle click of column top to play piece */
   handleClick(evt) {
+    if (this.gameOver) {
+      return; // no clicks, the game is over!
+    }
+
     // get x from ID of clicked cell
     const x = +evt.target.id;
 
@@ -146,4 +161,17 @@ class Game {
   }
 }
 
-new Game(6, 7);
+document.querySelector('#players').addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  const htmlBoard = document.getElementById('board');
+  htmlBoard.innerHTML = '';
+  
+  const playersInput = document.querySelectorAll('#players > input[type="text"]');
+  const players = [];
+  for (let cur of playersInput) {
+    players.push(cur.value);
+  }
+  
+  new Game(6, 7, players);
+});
